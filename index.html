@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guild Glory Bot</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body{
+    background:#0a0c10;
+    font-family: system-ui, sans-serif;
+}
+.glass{
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(15px);
+    border:1px solid rgba(255,255,255,0.1);
+}
+.hidden-step{display:none}
+</style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 text-white">
+
+<div class="w-full max-w-md glass rounded-2xl p-6 shadow-2xl">
+
+    <h1 class="text-xl font-bold mb-4 text-center">
+        Guild <span class="text-cyan-400">Glory</span> Bot
+    </h1>
+
+    <!-- Step Indicator -->
+    <p id="stepIndicator" class="text-xs text-center mb-4 text-cyan-400">
+        Step 1 / 4
+    </p>
+
+    <!-- Step 1 -->
+    <div id="step1">
+        <input id="uid"
+            type="text"
+            placeholder="Enter Guild UID"
+            class="w-full p-3 rounded-lg bg-black/40 border border-gray-600 mb-3 text-cyan-400">
+        <button onclick="App.nextStep(1)"
+            class="w-full bg-cyan-600 hover:bg-cyan-500 p-3 rounded-lg font-bold">
+            Verify UID
+        </button>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="step2" class="hidden-step">
+        <select id="server"
+            class="w-full p-3 rounded-lg bg-black/40 border border-gray-600 mb-3">
+            <option>Pakistan</option>
+            <option>India</option>
+            <option>Bangladesh</option>
+            <option>Brazil</option>
+        </select>
+        <button onclick="App.nextStep(2)"
+            class="w-full bg-cyan-600 hover:bg-cyan-500 p-3 rounded-lg font-bold">
+            Confirm Region
+        </button>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="step3" class="hidden-step">
+        <button onclick="App.selectBot(1)" class="bot w-full mb-2 p-2 rounded bg-black/40 border">Bot 1</button>
+        <button onclick="App.selectBot(2)" class="bot w-full mb-2 p-2 rounded bg-black/40 border">Bot 2</button>
+        <button onclick="App.selectBot(3)" class="bot w-full mb-3 p-2 rounded bg-black/40 border">Bot 3</button>
+
+        <button onclick="App.nextStep(3)"
+            class="w-full bg-cyan-600 hover:bg-cyan-500 p-3 rounded-lg font-bold">
+            Confirm Bot
+        </button>
+    </div>
+
+    <!-- Step 4 -->
+    <div id="step4" class="hidden-step">
+        <input id="points"
+            type="number"
+            value="1000"
+            class="w-full p-3 rounded-lg bg-black/40 border border-gray-600 mb-3">
+        <button onclick="App.nextStep(4)"
+            class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 p-3 rounded-lg font-bold">
+            Start Process
+        </button>
+    </div>
+
+    <!-- Result -->
+    <div id="result" class="hidden-step text-center">
+        <p class="text-red-400 font-bold mb-2">Server Error!</p>
+        <p class="text-sm text-gray-400">Connection Timeout at 99%</p>
+        <button onclick="location.reload()"
+            class="mt-4 w-full bg-red-600 p-3 rounded-lg font-bold">
+            Try Again
+        </button>
+    </div>
+
+</div>
+
+<script>
+const App = (() => {
+
+    let currentStep = 1;
+    let selectedBot = 1;
+
+    const stepIndicator = document.getElementById("stepIndicator");
+
+    function showStep(step){
+        document.querySelectorAll("[id^='step']").forEach(s=>{
+            s.classList.add("hidden-step");
+        });
+        const target = document.getElementById("step"+step);
+        if(target) target.classList.remove("hidden-step");
+        stepIndicator.innerText = "Step " + step + " / 4";
+        currentStep = step;
+    }
+
+    function validate(step){
+        if(step === 1){
+            const uid = document.getElementById("uid").value.trim();
+            if(uid.length < 6){
+                alert("Invalid UID");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    async function nextStep(step){
+        if(!validate(step)) return;
+
+        if(step < 4){
+            showStep(step + 1);
+        } else {
+            simulateProcess();
+        }
+    }
+
+    function selectBot(bot){
+        selectedBot = bot;
+        document.querySelectorAll(".bot").forEach(b=>{
+            b.classList.remove("border-cyan-400");
+        });
+        event.target.classList.add("border-cyan-400");
+    }
+
+    async function simulateProcess(){
+        showLoading();
+        await new Promise(r=>setTimeout(r,3000));
+        showResult();
+    }
+
+    function showLoading(){
+        document.getElementById("step4").innerHTML =
+            "<p class='text-center text-cyan-400'>Processing...</p>";
+    }
+
+    function showResult(){
+        document.getElementById("step4").classList.add("hidden-step");
+        document.getElementById("result").classList.remove("hidden-step");
+        stepIndicator.innerText = "FAILED";
+        stepIndicator.classList.add("text-red-500");
+    }
+
+    return { nextStep, selectBot };
+
+})();
+</script>
+
+</body>
+</html>
